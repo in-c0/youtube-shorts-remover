@@ -7,7 +7,7 @@ Free. Easy-to-use. Toggle switch for quick enabling/disabling of all Shorts from
 
 ## 📦 Installation
 
-[👉 Chrome Web Store](https://chrome.google.com/webstore/detail/youtube-shorts-playables/dilmoegnonbiadmhbmaehnhogjlkikdp)
+[Add to Chrome](https://chrome.google.com/webstore/detail/youtube-shorts-playables/dilmoegnonbiadmhbmaehnhogjlkikdp)
 
 ---
 
