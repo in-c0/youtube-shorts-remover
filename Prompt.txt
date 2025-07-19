@@ -1,0 +1,22 @@
+Build a shorts remover chrome extension from youtube home page, search page, and sidebar nav.
+(bonus: remove playables too)
+
+The elements to remove from home page are:
+
+1. <a id="endpoint" class="yt-simple-endpoint style-scope ytd-guide-entry-renderer" tabindex="-1" role="link" title="Shorts">
+
+2. <div id="dismissible" class="style-scope ytd-rich-shelf-renderer"> ... that contains 
+<button id="button" class="style-scope yt-icon-button" aria-label="Shorts – More actions"> (OR <button class="yt-spec-button-shape-next yt-spec-button-shape-next--tonal yt-spec-button-shape-next--mono yt-spec-button-shape-next--size-m yt-spec-button-shape-next--icon-button yt-spec-button-shape-next--enable-backdrop-filter-experiment" title="" aria-label="Shorts – More actions"> 
+in its children.
+
+3. <ytd-rich-section-renderer class="style-scope ytd-rich-grid-renderer"> that contains <span id="title" class="style-scope ytd-rich-shelf-renderer">YouTube Playables</span> in its children
+
+Element to remove from sidebar (at https://www.youtube.com/watch?v=...) are:
+
+1. <ytd-reel-shelf-renderer class="style-scope ytd-item-section-renderer" modern-typography=""><!--css-build:shady--> that contains <span id="title" class="style-scope ytd-reel-shelf-renderer">Shorts</span>
+
+Elements to remove from search results page (https://www.youtube.com/results?search_query=...) are:
+
+1. <button class="ytChipShapeButtonReset" role="tab" aria-selected="false"><div class="ytChipShapeChip ytChipShapeInactive ytChipShapeOnlyTextPadding">Shorts</div></button>
+
+2. <grid-shelf-view-model class="ytGridShelfViewModelHost ytd-item-section-renderer ytGridShelfViewModelHostHasBottomButton" style="margin-left: 0px; margin-right: 0px;" data-resize-observer-id="0"><yt-section-header-view-model class="ytSectionHeaderViewModelHost"> that contains <span class="yt-core-attributed-string yt-core-attributed-string--white-space-pre-wrap" role="text">Shorts</span>in its children
