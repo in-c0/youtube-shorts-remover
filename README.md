@@ -9,6 +9,8 @@ Free. Easy-to-use. Toggle switch for quick enabling/disabling of all Shorts from
 
 [Add to Chrome](https://chrome.google.com/webstore/detail/youtube-shorts-playables/dilmoegnonbiadmhbmaehnhogjlkikdp)
 
+(Update v1.1 under review - may take weeks to get approved. You may use the updated version available here in the meantime.)
+
 ---
 
 ## 🧩 Manual Installation (for development)
