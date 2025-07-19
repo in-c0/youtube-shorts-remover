@@ -13,7 +13,7 @@ Free. Easy-to-use. Toggle switch for quick enabling/disabling of all Shorts from
 
 ## 🧩 Manual Installation (for development)
 
-1. Clone this repo or download the source.
+1. Clone this repo or download the .zip file.
 2. Go to `chrome://extensions` in Chrome.
 3. Enable **Developer Mode** (top right).
 4. Click **Load unpacked** and select the extension folder.
