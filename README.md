@@ -7,9 +7,7 @@ Free. Easy-to-use. Toggle switch for quick disabling.
 
 ## 📦 Installation
 
-[Add to Chrome](https://chrome.google.com/webstore/detail/youtube-shorts-playables/dilmoegnonbiadmhbmaehnhogjlkikdp)
-
-(Update v1.1 under review - may take weeks to get approved by Chrome Store. You may use the updated version available here in the meantime.)
+[Add to Chrome](https://chrome.google.com/webstore/detail/youtube-shorts-playables/dilmoegnonbiadmhbmaehnhogjlkikdp) 
 
 ---
 
