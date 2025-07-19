@@ -7,12 +7,13 @@ Free. Easy-to-use. Toggle switch for quick enabling/disabling of all Shorts from
 
 ## 🔥 Features
 
-✅ Removes the **Shorts** buttons in the YouTube homepage, sidebar and search results
-✅ Hides **Shorts shelves** from the homepage
-✅ Automatically works on dynamically loaded content
+✅ Removes the **Shorts** buttons in the YouTube homepage, sidebar and search results  
+✅ Hides **Shorts shelves** from the homepage  
+✅ Automatically works on dynamically loaded content  
 
-**v1.1 Update (19/07/2025):**
-✅ Also removes:
+**v1.1 Update (19/07/2025):**  
+
+Extension now also removes:
 - Shorts tab and sections from **search results**   
 - YouTube **Playables** shelf from the homepage
 
