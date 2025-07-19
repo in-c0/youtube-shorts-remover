@@ -1,7 +1,7 @@
 # YouTube Shorts Remover (+ Playables Remover) Chrome Extension
 
 A lightweight Chrome Extension that removes **Shorts** from Youtube.  
-Free. Easy-to-use. Toggle switch for quick enabling/disabling of all Shorts from Youtube recommendations. 
+Free. Easy-to-use. Toggle switch for quick disabling. 
 
 ---
 
