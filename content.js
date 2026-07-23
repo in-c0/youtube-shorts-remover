@@ -76,14 +76,18 @@ function markShortsAndPlayables() {
 }
 
 // Debounced scheduler — coalesces bursts of mutations into a single sweep.
+// Uses setTimeout, NOT requestAnimationFrame: rAF is fully paused in hidden /
+// background tabs, so a YouTube tab loaded in the background would never get
+// swept and Shorts would stay visible. setTimeout still fires when hidden
+// (throttled), guaranteeing the sweep runs regardless of tab visibility.
 let scheduled = false;
 function schedule() {
   if (scheduled || !enabled) return;
   scheduled = true;
-  requestAnimationFrame(() => {
+  setTimeout(() => {
     scheduled = false;
     if (enabled) markShortsAndPlayables();
-  });
+  }, 0);
 }
 
 // Inject the stylesheet that hides tagged elements while the extension is active.
@@ -115,4 +119,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
     enabled = changes.enabled.newValue;
     applyEnabled();
   }
+});
+
+// Re-sweep when the tab becomes visible, in case mutations arrived while it was
+// hidden (background tabs throttle timers, so a sweep may have been deferred).
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) schedule();
 });
