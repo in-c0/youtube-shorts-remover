@@ -39,6 +39,9 @@ The extension now also removes:
 - **Performance** — the `MutationObserver` is now debounced with `requestAnimationFrame`, so it no longer runs a full sweep on every DOM change.
 - Hiding is now CSS-based (reversible) instead of destructively removing DOM nodes.
 
+### **v1.2.1 Update (23/07/2025):**
+- **Fixed** Shorts not being hidden in tabs loaded in the background — the sweep used `requestAnimationFrame`, which browsers pause in hidden tabs. It now uses `setTimeout` (which still fires when hidden) and re-sweeps when the tab becomes visible.
+
 ---
 
 ## 📁 Files

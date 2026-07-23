@@ -38,6 +38,9 @@ Open source: https://github.com/in-c0/youtube-shorts-remover
 The extension has one purpose: to hide YouTube Shorts and Playables content from the YouTube interface, with a toggle to enable/disable that behavior.
 
 ## What changed in this version (release notes)
+v1.2.1 (follow-up patch — submit after v1.2 is approved)
+- Fixed Shorts not being hidden in tabs opened in the background (timer was paused while the tab was hidden).
+
 v1.2
 - Added a real on/off toggle switch in the toolbar popup (state syncs across devices).
 - Fixed the watch-page "Shorts remixing this video" shelf not being removed after a YouTube DOM change.
