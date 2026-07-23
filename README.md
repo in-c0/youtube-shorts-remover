@@ -33,12 +33,19 @@ The extension now also removes:
 - Shorts tab and sections from **search results**   
 - YouTube **Playables** shelf from the homepage
 
+### **v1.2 Update (23/07/2025):**
+- **Real toggle switch** — click the toolbar icon for an on/off switch. Turning it off restores Shorts instantly, no page reload needed (state syncs across your devices).
+- **Fixed** the watch-page Shorts shelf ("Shorts remixing this video") not being removed — YouTube changed that element from `<span id="title">` to `<yt-formatted-string id="title">`, so title lookups now match by id regardless of tag.
+- **Performance** — the `MutationObserver` is now debounced with `requestAnimationFrame`, so it no longer runs a full sweep on every DOM change.
+- Hiding is now CSS-based (reversible) instead of destructively removing DOM nodes.
+
 ---
 
 ## 📁 Files
 
 - `manifest.json` — Chrome extension manifest (v3)
 - `content.js` — Main script for DOM filtering
+- `popup.html` / `popup.js` — Toolbar toggle switch
 - `icon.png` — Extension icon (optional)
 
 ---
@@ -48,10 +55,11 @@ The extension now also removes:
 This extension uses a simple content script to:
 
 - Detect Shorts and Playables sections using CSS selectors and text
-- Remove them from the homepage, search results, and video sidebars
-- Monitor for dynamic content using a `MutationObserver`
+- Hide them (reversibly, via a CSS class) from the homepage, search results, and video sidebars
+- Monitor for dynamic content using a debounced `MutationObserver`
+- Store the on/off state with `chrome.storage.sync`
 
-No background scripts/permissions/tracking. 100% local.
+No background scripts or tracking. The only permission requested is `storage`, used solely to remember the toggle state. 100% local.
 
 ---
 
