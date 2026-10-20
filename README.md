@@ -31,7 +31,7 @@ Free. Easy-to-use. Toggle switch for quick disabling.
 ### **v1.1 Update (19/07/2025):**
 The extension now also removes:
 - Shorts tab and sections from **search results**   
-- YouTube **Playables** shelf from the homepage
+- YouTube **Playables** shelf from the homepage (and, since v1.2.2, from search results)
 
 ### **v1.2 Update (23/07/2025):**
 - **Real toggle switch** — click the toolbar icon for an on/off switch. Turning it off restores Shorts instantly, no page reload needed (state syncs across your devices).
@@ -41,6 +41,14 @@ The extension now also removes:
 
 ### **v1.2.1 Update (23/07/2025):**
 - **Fixed** Shorts not being hidden in tabs loaded in the background — the sweep used `requestAnimationFrame`, which browsers pause in hidden tabs. It now uses `setTimeout` (which still fires when hidden) and re-sweeps when the tab becomes visible.
+
+### **v1.2.2 Update (20/10/2026):**
+- **Fixed** Playables still showing in **search results** — YouTube renders them there as a different component (`ytd-horizontal-card-list-renderer` with mini game cards) that the homepage-only check never matched.
+- Playables are now detected by their `/playables` links instead of the English title "YouTube Playables", so detection works in every UI language and also catches Playables entries in the sidebar and single game tiles.
+
+### **v1.2.3 Update (20/10/2026):**
+- **Fixed** Shorts shelves showing again in **search results**. YouTube added a Shorts icon in front of the shelf title, and the old check read that (empty) icon instead of the title, so it never matched.
+- Shorts shelves in search results and on watch pages are now detected by their `/shorts/` links, so this also works in every UI language.
 
 ---
 

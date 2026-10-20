@@ -1,7 +1,7 @@
-# Chrome Web Store listing — v1.2
+# Chrome Web Store listing — v1.2.3
 
-Copy-paste this into the Developer Dashboard for the v1.2 review submission.
-Upload artifact: `youtube-shorts-remover-v1.2.zip`
+Copy-paste this into the Developer Dashboard for the v1.2.3 review submission.
+Upload artifact: `youtube-shorts-remover-v1.2.3.zip`
 
 ---
 
@@ -19,7 +19,7 @@ A minimalist, free extension that hides YouTube Shorts and Playables across the 
 
 Features
 • Removes Shorts from the homepage recommendations
-• Removes the Playables shelf from the homepage
+• Removes Playables from the homepage, search results and sidebar (works in any language)
 • Hides the Shorts tab and Shorts shelves in search results
 • Removes the "Shorts remixing this video" shelf on watch pages
 • One-click toggle switch — turn it off to bring Shorts back instantly, no page reload
@@ -38,6 +38,14 @@ Open source: https://github.com/in-c0/youtube-shorts-remover
 The extension has one purpose: to hide YouTube Shorts and Playables content from the YouTube interface, with a toggle to enable/disable that behavior.
 
 ## What changed in this version (release notes)
+v1.2.3
+- Fixed Shorts shelves showing again in search results after a YouTube layout change.
+- Shorts shelves are now detected by link rather than title text, so it works in every YouTube language.
+
+v1.2.2
+- Fixed Playables still appearing in search results (YouTube uses a different layout there).
+- Playables are now detected by link rather than English title text, so it works in every YouTube language.
+
 v1.2.1 (follow-up patch — submit after v1.2 is approved)
 - Fixed Shorts not being hidden in tabs opened in the background (timer was paused while the tab was hidden).
 

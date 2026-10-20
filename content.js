@@ -15,6 +15,30 @@
 const HIDDEN_CLASS = "ysr-hidden";
 let enabled = true;
 
+const PLAYABLE_LINK_SELECTOR = [
+  "a[href^='/playables']",
+  "a[href^='https://www.youtube.com/playables']",
+  "a[href^='/gaming/games']"
+].join(",");
+
+// Outermost-first: for each /playables link, hide the largest container that
+// is still specific to Playables (never a generic results section).
+const PLAYABLE_CONTAINERS = [
+  "ytd-rich-section-renderer",        // homepage shelf
+  "ytd-horizontal-card-list-renderer", // search-results shelf
+  "ytd-guide-entry-renderer",          // sidebar nav entry
+  "ytd-mini-guide-entry-renderer",     // collapsed sidebar entry
+  "ytd-rich-item-renderer",            // single game tile in a grid
+  "ytd-mini-game-card-view-model"      // single game card
+];
+
+// Links to individual Shorts. A shelf full of these is a Shorts shelf in any
+// UI language, so shelves are matched by their links, not their title text.
+const SHORTS_LINK_SELECTOR = [
+  "a[href^='/shorts/']",
+  "a[href^='https://www.youtube.com/shorts/']"
+].join(",");
+
 function tag(el) {
   if (el) el.classList.add(HIDDEN_CLASS);
 }
@@ -39,12 +63,33 @@ function markShortsAndPlayables() {
     }
   });
 
-  // Playables section on the homepage
+  // Playables section on the homepage (title match, English only — kept as a
+  // fallback; the link-based pass below is the primary, language-independent one)
   document.querySelectorAll("ytd-rich-section-renderer").forEach(section => {
     const title = section.querySelector("#title");
     if (title && title.textContent.includes("YouTube Playables")) {
       tag(section);
     }
+  });
+
+  // Playables anywhere, identified by links to /playables rather than by
+  // title text, so it works in every UI language and in every layout:
+  // homepage shelf, search-results shelf (ytd-horizontal-card-list-renderer
+  // with mini game cards), sidebar guide entries and single game tiles.
+  document.querySelectorAll(PLAYABLE_LINK_SELECTOR).forEach(a => {
+    for (const sel of PLAYABLE_CONTAINERS) {
+      const container = a.closest(sel);
+      if (container) {
+        tag(container);
+        break;
+      }
+    }
+  });
+
+  // Game cards that render without a /playables href (e.g. click handled by
+  // a button) — hide their enclosing shelf, or the card itself.
+  document.querySelectorAll("ytd-mini-game-card-view-model").forEach(card => {
+    tag(card.closest("ytd-rich-section-renderer, ytd-horizontal-card-list-renderer, ytd-rich-item-renderer") || card);
   });
 
   // Shorts shelf in the watch-page sidebar.
@@ -66,10 +111,13 @@ function markShortsAndPlayables() {
     }
   });
 
-  // Shorts shelf in search results
-  document.querySelectorAll("grid-shelf-view-model").forEach(shelf => {
-    const header = shelf.querySelector("span");
-    if (header && header.textContent.trim() === "Shorts") {
+  // Shorts shelves in search results and on the watch page, matched by their
+  // /shorts/ links. The old check read the first <span> of the shelf header
+  // and compared it to "Shorts"; YouTube now puts a Shorts icon <span> before
+  // the title, so that first span is empty and every search-results Shorts
+  // shelf stayed visible (found by CVF's live probe on 20 Oct 2026).
+  document.querySelectorAll("grid-shelf-view-model, ytd-reel-shelf-renderer").forEach(shelf => {
+    if (shelf.querySelector(SHORTS_LINK_SELECTOR)) {
       tag(shelf);
     }
   });
