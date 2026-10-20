@@ -46,6 +46,10 @@ The extension now also removes:
 - **Fixed** Playables still showing in **search results** — YouTube renders them there as a different component (`ytd-horizontal-card-list-renderer` with mini game cards) that the homepage-only check never matched.
 - Playables are now detected by their `/playables` links instead of the English title "YouTube Playables", so detection works in every UI language and also catches Playables entries in the sidebar and single game tiles.
 
+### **v1.2.3 Update (20/10/2026):**
+- **Fixed** Shorts shelves showing again in **search results**. YouTube added a Shorts icon in front of the shelf title, and the old check read that (empty) icon instead of the title, so it never matched.
+- Shorts shelves in search results and on watch pages are now detected by their `/shorts/` links, so this also works in every UI language.
+
 ---
 
 ## 📁 Files
