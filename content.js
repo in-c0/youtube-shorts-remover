@@ -32,6 +32,13 @@ const PLAYABLE_CONTAINERS = [
   "ytd-mini-game-card-view-model"      // single game card
 ];
 
+// Links to individual Shorts. A shelf full of these is a Shorts shelf in any
+// UI language, so shelves are matched by their links, not their title text.
+const SHORTS_LINK_SELECTOR = [
+  "a[href^='/shorts/']",
+  "a[href^='https://www.youtube.com/shorts/']"
+].join(",");
+
 function tag(el) {
   if (el) el.classList.add(HIDDEN_CLASS);
 }
@@ -104,10 +111,13 @@ function markShortsAndPlayables() {
     }
   });
 
-  // Shorts shelf in search results
-  document.querySelectorAll("grid-shelf-view-model").forEach(shelf => {
-    const header = shelf.querySelector("span");
-    if (header && header.textContent.trim() === "Shorts") {
+  // Shorts shelves in search results and on the watch page, matched by their
+  // /shorts/ links. The old check read the first <span> of the shelf header
+  // and compared it to "Shorts"; YouTube now puts a Shorts icon <span> before
+  // the title, so that first span is empty and every search-results Shorts
+  // shelf stayed visible (found by CVF's live probe on 20 Oct 2026).
+  document.querySelectorAll("grid-shelf-view-model, ytd-reel-shelf-renderer").forEach(shelf => {
+    if (shelf.querySelector(SHORTS_LINK_SELECTOR)) {
       tag(shelf);
     }
   });
