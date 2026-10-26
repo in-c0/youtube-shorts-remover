@@ -122,7 +122,7 @@ async function main() {
     : fixture?.state === "PASS" && live?.state === "PASS" ? "PASS" : "UNKNOWN";
   const evidence = { schema_version: 1, product: "ysr", source: "UNPACKED_SOURCE_NOT_STORE",
     generated_at: new Date().toISOString(), started_at: startedAt,
-    source_sha: process.env.GITHUB_SHA || "LOCAL", overall, results };
+    source_sha: process.env.CVF_SOURCE_SHA || process.env.GITHUB_SHA || "LOCAL", overall, results };
   const outdir = join(dirname(fileURLToPath(import.meta.url)), "evidence");
   await mkdir(outdir, { recursive: true });
   await writeFile(join(outdir, "latest-probe.json"), JSON.stringify(evidence, null, 2) + "\n");
