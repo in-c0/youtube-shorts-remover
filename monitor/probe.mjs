@@ -24,7 +24,7 @@ function statusWhen(found, hidden, normal, active) {
   if (found === 0) return { state: "UNKNOWN", reason: "NO_POSITIVE_SHORTS_SHELF_SIGNAL" };
   if (normal === 0) return { state: "UNKNOWN", reason: "NO_NORMAL_VIDEO_NEGATIVE_CONTROL" };
   if (hidden !== found) return { state: "FAILED", reason: "SHORTS_SHELF_VISIBLE" };
-  return { state: "PASS", reason: "OBSERVED_SHORTS_SHELVES_HIDDEN_WITH_NEGATIVE_CONTROL" };
+  return { state: "PASS", reason: "CAUSAL_SHORTS_HIDING_OBSERVED_WITH_NEGATIVE_CONTROL" };
 }
 
 async function runFixture(context) {
@@ -74,19 +74,32 @@ async function runLive(context) {
       const shelves = Array.from(document.querySelectorAll(
         "grid-shelf-view-model, ytd-reel-shelf-renderer, ytd-rich-shelf-renderer"
       )).filter(el => el.querySelector("a[href^='/shorts/'],a[href^='https://www.youtube.com/shorts/']"));
-      const hidden = shelves.filter(el => getComputedStyle(el).display === "none").length;
-      const normals = Array.from(document.querySelectorAll(
+      const root = document.documentElement;
+      const visibleWithExtension = shelves.map(el => getComputedStyle(el).display !== "none");
+      const normalEls = Array.from(document.querySelectorAll(
         "ytd-video-renderer, ytd-rich-grid-media"
-      )).filter(el => el.querySelector("a[href^='/watch'],a[href^='https://www.youtube.com/watch']") &&
-                     getComputedStyle(el).display !== "none").length;
+      )).filter(el => el.querySelector("a[href^='/watch'],a[href^='https://www.youtube.com/watch']"));
+      const normalBefore = normalEls.filter(el => getComputedStyle(el).display !== "none").length;
+      // Causality control: temporarily disable only OUR CSS gate, then restore it.
+      // This prevents native YouTube-hidden shelves from masquerading as extension success.
+      if (active) root.classList.remove("ysr-active");
+      const visibleWithoutExtension = shelves.map(el => getComputedStyle(el).display !== "none");
+      const normalWithout = normalEls.filter(el => getComputedStyle(el).display !== "none").length;
+      if (active) root.classList.add("ysr-active");
+      const visibleAfterRestore = shelves.map(el => getComputedStyle(el).display !== "none");
+      const eligible = visibleWithoutExtension.filter(Boolean).length;
+      const causallyHidden = visibleWithoutExtension.filter((v, i) =>
+        v && !visibleWithExtension[i] && !visibleAfterRestore[i]).length;
       return { active, renderedYouTube: !!document.querySelector("ytd-app"),
-        shortsShelves: shelves.length, hiddenShortsShelves: hidden, visibleNormalVideos: normals };
+        shortsShelves: shelves.length, observableShortsShelves: eligible,
+        causallyHiddenShortsShelves: causallyHidden,
+        visibleNormalVideos: Math.min(normalBefore, normalWithout) };
     });
     if (!data.renderedYouTube) {
       return { surface: "LIVE_YOUTUBE_SEARCH", state: "UNKNOWN",
         reason: "YOUTUBE_PAGE_OR_CONSENT_NOT_RENDERED", counts: data };
     }
-    const verdict = statusWhen(data.shortsShelves, data.hiddenShortsShelves,
+    const verdict = statusWhen(data.observableShortsShelves, data.causallyHiddenShortsShelves,
       data.visibleNormalVideos, data.active);
     return { surface: "LIVE_YOUTUBE_SEARCH", ...verdict, counts: data };
   } catch (error) {
