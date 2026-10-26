@@ -1,4 +1,4 @@
-name: YSR real-browser source probe (draft)
+name: YSR real-browser source probe
 
 on:
   pull_request:
@@ -6,6 +6,9 @@ on:
       - "monitor/**"
       - ".github/workflows/ysr-live-probe.yml"
   workflow_dispatch:
+  schedule:
+    # Four independent hosted checks/day, offset from the busy top of the hour.
+    - cron: "17 */6 * * *"
 
 permissions:
   contents: read
