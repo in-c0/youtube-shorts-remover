@@ -1,0 +1,186 @@
+// Read-only: this tests an unpacked SOURCE extension, not the store artifact.
+// No screenshots, browsing history, credentials, or user page contents are collected.
+import { chromium } from "playwright";
+import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const extensionRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const fixtureURL = "https://www.youtube.com/__cvf_ysr_fixture__";
+const liveURL = "https://www.youtube.com/results?search_query=shorts";
+const normalURL = "https://www.youtube.com/results?search_query=javascript%20tutorial";
+const fixtureHTML = [
+  "<!doctype html><html><head><meta charset='utf-8'><title>Controlled YSR fixture</title>",
+  "<style>grid-shelf-view-model,ytd-horizontal-card-list-renderer,ytd-video-renderer{display:block}</style>",
+  "</head><body>",
+  "<grid-shelf-view-model id='shorts'><a href='/shorts/fixture'>Shorts clip</a></grid-shelf-view-model>",
+  "<ytd-horizontal-card-list-renderer id='playables'><a href='/playables'>A game</a></ytd-horizontal-card-list-renderer>",
+  "<ytd-video-renderer id='normal'><a href='/watch?v=fixture'>Ordinary video</a></ytd-video-renderer>",
+  "</body></html>"
+].join("");
+
+function statusWhen(found, hidden, active) {
+  if (!active) return { state: "FAILED", reason: "CONTENT_SCRIPT_NOT_ACTIVE" };
+  if (found === 0) return { state: "UNKNOWN", reason: "NO_POSITIVE_SHORTS_SHELF_SIGNAL" };
+  if (hidden !== found) return { state: "FAILED", reason: "SHORTS_SHELF_VISIBLE" };
+  return { state: "PASS", reason: "CAUSAL_SHORTS_HIDING_OBSERVED" };
+}
+
+async function runFixture(context) {
+  await context.route(fixtureURL, route => route.fulfill({
+    status: 200,
+    contentType: "text/html",
+    body: fixtureHTML
+  }));
+  const page = await context.newPage();
+  try {
+    await page.goto(fixtureURL, { waitUntil: "load", timeout: 15000 });
+    await page.waitForFunction(() => document.documentElement.classList.contains("ysr-active"), null, { timeout: 10000 });
+    await page.waitForFunction(() =>
+      document.querySelector("#shorts")?.classList.contains("ysr-hidden") &&
+      document.querySelector("#playables")?.classList.contains("ysr-hidden"),
+      null, { timeout: 10000 });
+    const result = await page.evaluate(() => {
+      const hide = id => getComputedStyle(document.getElementById(id)).display === "none";
+      return {
+        active: document.documentElement.classList.contains("ysr-active"),
+        shortsHidden: hide("shorts"),
+        playablesHidden: hide("playables"),
+        ordinaryVideoVisible: !hide("normal")
+      };
+    });
+    return { surface: "CONTROLLED_BROWSER_FIXTURE", state:
+      result.active && result.shortsHidden && result.playablesHidden && result.ordinaryVideoVisible ? "PASS" : "FAILED",
+      reason: "CHROMIUM_UNPACKED_EXTENSION_FIXTURE", controls: result };
+  } catch (error) {
+    return { surface: "CONTROLLED_BROWSER_FIXTURE", state: "FAILED",
+      reason: "FIXTURE_TEST_ERROR", detail: String(error.message).slice(0, 180) };
+  } finally { await page.close(); }
+}
+
+async function runLive(context) {
+  const page = await context.newPage();
+  try {
+    const response = await page.goto(liveURL, { waitUntil: "domcontentloaded", timeout: 30000 });
+    if (!response || response.status() >= 400) {
+      return { surface: "LIVE_YOUTUBE_SEARCH", state: "UNKNOWN",
+        reason: "YOUTUBE_HTTP_UNAVAILABLE", http_status: response?.status() ?? null };
+    }
+    // The public anonymous page varies by region, consent and YouTube experiments.
+    await page.waitForTimeout(8000);
+    const data = await page.evaluate(() => {
+      const active = document.documentElement.classList.contains("ysr-active");
+      const shelves = Array.from(document.querySelectorAll(
+        "grid-shelf-view-model, ytd-reel-shelf-renderer, ytd-rich-shelf-renderer"
+      )).filter(el => el.querySelector("a[href^='/shorts/'],a[href^='https://www.youtube.com/shorts/']"));
+      const root = document.documentElement;
+      const visibleWithExtension = shelves.map(el => getComputedStyle(el).display !== "none");
+      // Causality control: temporarily disable only OUR CSS gate, then restore it.
+      // This prevents native YouTube-hidden shelves from masquerading as extension success.
+      if (active) root.classList.remove("ysr-active");
+      const visibleWithoutExtension = shelves.map(el => getComputedStyle(el).display !== "none");
+      if (active) root.classList.add("ysr-active");
+      const visibleAfterRestore = shelves.map(el => getComputedStyle(el).display !== "none");
+      const eligible = visibleWithoutExtension.filter(Boolean).length;
+      const causallyHidden = visibleWithoutExtension.filter((v, i) =>
+        v && !visibleWithExtension[i] && !visibleAfterRestore[i]).length;
+      return { active, renderedYouTube: !!document.querySelector("ytd-app"),
+        shortsShelves: shelves.length, observableShortsShelves: eligible,
+        causallyHiddenShortsShelves: causallyHidden };
+    });
+    if (!data.renderedYouTube) {
+      return { surface: "LIVE_YOUTUBE_SEARCH", state: "UNKNOWN",
+        reason: "YOUTUBE_PAGE_OR_CONSENT_NOT_RENDERED", counts: data };
+    }
+    const verdict = statusWhen(data.observableShortsShelves, data.causallyHiddenShortsShelves, data.active);
+    return { surface: "LIVE_YOUTUBE_SEARCH", ...verdict, counts: data };
+  } catch (error) {
+    return { surface: "LIVE_YOUTUBE_SEARCH", state: "UNKNOWN",
+      reason: "LIVE_BROWSER_OR_NETWORK_INCONCLUSIVE", detail: String(error.message).slice(0, 180) };
+  } finally { await page.close(); }
+}
+
+async function runNormalVideoControl(context) {
+  const page = await context.newPage();
+  try {
+    const response = await page.goto(normalURL, { waitUntil: "domcontentloaded", timeout: 30000 });
+    if (!response || response.status() >= 400) {
+      return { surface: "LIVE_YOUTUBE_NORMAL_VIDEO_CONTROL", state: "UNKNOWN",
+        reason: "YOUTUBE_HTTP_UNAVAILABLE", http_status: response?.status() ?? null };
+    }
+    await page.waitForTimeout(8000);
+    const data = await page.evaluate(() => {
+      const root = document.documentElement;
+      const active = root.classList.contains("ysr-active");
+      const videos = Array.from(document.querySelectorAll(
+        "ytd-video-renderer, ytd-rich-grid-media"
+      )).filter(el => el.querySelector("a[href^='/watch'],a[href^='https://www.youtube.com/watch']"));
+      const visible = el => getComputedStyle(el).display !== "none" && el.getClientRects().length > 0;
+      const withExtension = videos.map(visible);
+      if (active) root.classList.remove("ysr-active");
+      const withoutExtension = videos.map(visible);
+      if (active) root.classList.add("ysr-active");
+      const afterRestore = videos.map(visible);
+      const eligible = withoutExtension.filter(Boolean).length;
+      const preserved = withoutExtension.filter((v, i) =>
+        v && withExtension[i] && afterRestore[i]).length;
+      return { active, renderedYouTube: !!document.querySelector("ytd-app"),
+        normalVideoElements: videos.length, eligibleNormalVideos: eligible,
+        preservedNormalVideos: preserved };
+    });
+    if (!data.renderedYouTube) {
+      return { surface: "LIVE_YOUTUBE_NORMAL_VIDEO_CONTROL", state: "UNKNOWN",
+        reason: "YOUTUBE_PAGE_OR_CONSENT_NOT_RENDERED", counts: data };
+    }
+    const verdict = !data.active ? { state: "FAILED", reason: "CONTENT_SCRIPT_NOT_ACTIVE" }
+      : data.eligibleNormalVideos === 0 ? { state: "UNKNOWN", reason: "NO_OBSERVABLE_NORMAL_VIDEO" }
+      : data.preservedNormalVideos !== data.eligibleNormalVideos
+        ? { state: "FAILED", reason: "NORMAL_VIDEO_SUPPRESSED_BY_EXTENSION" }
+        : { state: "PASS", reason: "ORDINARY_VIDEOS_PRESERVED" };
+    return { surface: "LIVE_YOUTUBE_NORMAL_VIDEO_CONTROL", ...verdict, counts: data };
+  } catch (error) {
+    return { surface: "LIVE_YOUTUBE_NORMAL_VIDEO_CONTROL", state: "UNKNOWN",
+      reason: "LIVE_BROWSER_OR_NETWORK_INCONCLUSIVE", detail: String(error.message).slice(0, 180) };
+  } finally { await page.close(); }
+}
+
+async function main() {
+  const profile = await mkdtemp(join(tmpdir(), "cvf-ysr-probe-"));
+  const startedAt = new Date().toISOString();
+  let context, results = [];
+  try {
+    context = await chromium.launchPersistentContext(profile, {
+      channel: "chromium",
+      headless: true,
+      args: ["--disable-extensions-except=" + extensionRoot, "--load-extension=" + extensionRoot],
+      viewport: { width: 1440, height: 900 },
+      locale: "en-US"
+    });
+    results.push(await runFixture(context));
+    results.push(await runLive(context));
+    results.push(await runNormalVideoControl(context));
+  } catch (error) {
+    results.push({ surface: "BROWSER_BOOT", state: "UNKNOWN",
+      reason: "CHROMIUM_COULD_NOT_LAUNCH", detail: String(error.message).slice(0, 180) });
+  } finally {
+    if (context) await context.close();
+    await rm(profile, { recursive: true, force: true });
+  }
+  const fixture = results.find(r => r.surface === "CONTROLLED_BROWSER_FIXTURE");
+  const live = results.find(r => r.surface === "LIVE_YOUTUBE_SEARCH");
+  const normal = results.find(r => r.surface === "LIVE_YOUTUBE_NORMAL_VIDEO_CONTROL");
+  const overall = results.some(r => r.state === "FAILED") ? "FAILED"
+    : fixture?.state === "PASS" && live?.state === "PASS" && normal?.state === "PASS"
+      ? "PASS" : "UNKNOWN";
+  const evidence = { schema_version: 1, product: "ysr", source: "UNPACKED_SOURCE_NOT_STORE",
+    generated_at: new Date().toISOString(), started_at: startedAt,
+    source_sha: process.env.CVF_SOURCE_SHA || process.env.GITHUB_SHA || "LOCAL", overall, results };
+  const outdir = join(dirname(fileURLToPath(import.meta.url)), "evidence");
+  await mkdir(outdir, { recursive: true });
+  await writeFile(join(outdir, "latest-probe.json"), JSON.stringify(evidence, null, 2) + "\n");
+  console.log(JSON.stringify(evidence, null, 2));
+  // An inconclusive run is NOT a green health verdict.
+  if (overall !== "PASS") process.exitCode = overall === "FAILED" ? 1 : 2;
+}
+await main();
