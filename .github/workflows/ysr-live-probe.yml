@@ -25,9 +25,11 @@ jobs:
         run: ./monitor/node_modules/.bin/playwright install chromium
       - name: Controlled fixture and live YouTube probe
         run: node monitor/probe.mjs
+        env:
+          CVF_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Preserve verdict evidence without screenshots or user content
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ysr-unpacked-probe
           path: monitor/evidence/latest-probe.json
