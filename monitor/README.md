@@ -1,4 +1,4 @@
-# YSR browser probe — draft, read-only
+# YSR browser probe — source runtime, read-only
 
 This is an experimental **unpacked source** probe for `in-c0/youtube-shorts-remover`, not proof that the public Chrome/Edge/Firefox store artifacts match this source or work on every user's device.
 
@@ -11,11 +11,11 @@ This is an experimental **unpacked source** probe for `in-c0/youtube-shorts-remo
 
 ## Safety and resource limits
 
-- Triggered only for this draft PR and manual dispatch. **No scheduled production claims** until a genuine public-site PASS, repeatability and cost review.
-- Pinned `playwright@1.64.1`; Chromium downloaded per fresh runner. This can consume Actions minutes, so it is **not** hourly.
+- Triggered by pull requests affecting the probe, manual dispatch, and GitHub Actions cron at 00:17, 06:17, 12:17, 18:17 UTC. The scheduled workflow runs on the default branch, independent of any owner PC. GitHub may delay/drop schedule events; an absent run is not a healthy product verdict.
+- Pinned `playwright@1.64.1`; Chromium downloaded per fresh runner. The 8-minute job timeout and four runs/day bound frequency, but Actions billing can still accumulate. Account-wide spending limits and usage must be monitored.
 - Does not submit browser extensions, edit Chrome store metadata, collect end-user feedback, upload page content, or change the existing live extension.
 - Two anonymous read-only YouTube search requests plus the controlled test fixture. No sign-in, CAPTCHA solving, location spoofing, retries or bypasses when YouTube blocks access.
-- Evidence is restricted to 7-day GitHub Actions artifact retention. Unknown and failed outcomes need human inspection, not automatic code fixes or release.
+- Evidence is restricted to 7-day GitHub Actions artifact retention. Unknown and failed outcomes need human inspection, not automatic code fixes or release. GitHub Actions outage or schedule suppression means **MISSING/UNKNOWN**, not success; a separate provider must detect that absence for a true unattended watchdog.
 - Explicitly outside scope: exact store artifact hash/version verification, user device compatibility, public ratings, and production extension runtime; never conflate these with source-probe success.
 
 ## Local reproduction
