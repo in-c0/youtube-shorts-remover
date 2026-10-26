@@ -1,0 +1,35 @@
+name: YSR real-browser source probe (draft)
+
+on:
+  pull_request:
+    paths:
+      - "monitor/**"
+      - ".github/workflows/ysr-live-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+      - name: Install pinned browser test dependency
+        run: npm install --prefix monitor --ignore-scripts --no-audit --no-fund
+      - name: Install Chromium for real MV3 extension loading
+        run: ./monitor/node_modules/.bin/playwright install chromium
+      - name: Controlled fixture and live YouTube probe
+        run: node monitor/probe.mjs
+      - name: Preserve verdict evidence without screenshots or user content
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ysr-unpacked-probe
+          path: monitor/evidence/latest-probe.json
+          if-no-files-found: ignore
+          retention-days: 7
