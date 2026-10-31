@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "YouTube ショート & プレイアブル リムーバー",
+    "description": "Extension name shown in the Chrome Web Store and browser."
+  },
+  "extDescription": {
+    "message": "YouTube のホーム、検索結果、サイドバーからショートとプレイアブルを非表示にします。",
+    "description": "Short description shown in the Chrome Web Store (max 132 characters)."
+  }
+}

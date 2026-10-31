@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Suppresseur de Shorts et Playables YouTube",
+    "description": "Extension name shown in the Chrome Web Store and browser."
+  },
+  "extDescription": {
+    "message": "Masque les Shorts et les Playables sur la page d'accueil, dans les résultats de recherche et la barre latérale de YouTube.",
+    "description": "Short description shown in the Chrome Web Store (max 132 characters)."
+  }
+}
