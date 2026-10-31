@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "YouTube Shorts & Playables Remover",
+    "description": "Extension name shown in the Chrome Web Store and browser."
+  },
+  "extDescription": {
+    "message": "Removes Shorts and Playables from YouTube homepage, search results, and sidebar.",
+    "description": "Short description shown in the Chrome Web Store (max 132 characters)."
+  },
+  "actionTitle": {
+    "message": "Shorts & Playables Remover",
+    "description": "Toolbar button tooltip."
+  }
+}

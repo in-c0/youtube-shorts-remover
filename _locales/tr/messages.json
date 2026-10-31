@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "YouTube Shorts ve Playables Kaldırıcı",
+    "description": "Extension name shown in the Chrome Web Store and browser."
+  },
+  "extDescription": {
+    "message": "YouTube ana sayfasında, arama sonuçlarında ve kenar çubuğunda Shorts ve Playables içeriklerini gizler.",
+    "description": "Short description shown in the Chrome Web Store (max 132 characters)."
+  }
+}

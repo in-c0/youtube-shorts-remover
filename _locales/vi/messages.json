@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Trình xóa Shorts & Playables trên YouTube",
+    "description": "Extension name shown in the Chrome Web Store and browser."
+  },
+  "extDescription": {
+    "message": "Ẩn Shorts và Playables khỏi trang chủ, kết quả tìm kiếm và thanh bên của YouTube.",
+    "description": "Short description shown in the Chrome Web Store (max 132 characters)."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Removedor de Shorts e Playables do YouTube",
+    "description": "Extension name shown in the Chrome Web Store and browser."
+  },
+  "extDescription": {
+    "message": "Oculta Shorts e Playables da página inicial, dos resultados de pesquisa e da barra lateral do YouTube.",
+    "description": "Short description shown in the Chrome Web Store (max 132 characters)."
+  }
+}

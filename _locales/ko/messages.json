@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "YouTube 쇼츠 & 플레이어블 제거기",
+    "description": "Extension name shown in the Chrome Web Store and browser."
+  },
+  "extDescription": {
+    "message": "YouTube 홈, 검색 결과, 사이드바에서 Shorts(쇼츠)와 Playables(플레이어블)를 숨깁니다.",
+    "description": "Short description shown in the Chrome Web Store (max 132 characters)."
+  }
+}

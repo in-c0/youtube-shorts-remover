@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "YouTube Shorts और Playables रिमूवर",
+    "description": "Extension name shown in the Chrome Web Store and browser."
+  },
+  "extDescription": {
+    "message": "YouTube होमपेज, खोज परिणामों और साइडबार से Shorts और Playables को छिपाता है।",
+    "description": "Short description shown in the Chrome Web Store (max 132 characters)."
+  }
+}
