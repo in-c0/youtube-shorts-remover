@@ -40,6 +40,12 @@
     input:checked + .slider { background: #cc0000; }
     input:checked + .slider::before { transform: translateX(20px); }
     .status { margin-top: 12px; font-size: 12px; opacity: 0.7; }
+    .feedback { margin-top: 14px; padding-top: 11px; border-top: 1px solid #e6e6e6; }
+    .feedback a { color: inherit; font-size: 12px; text-underline-offset: 3px; }
+    .feedback a:focus-visible { outline: 2px solid #4c8bf5; outline-offset: 3px; }
+    .feedback-hint { margin: 9px 0 0; font-size: 12px; line-height: 1.4; opacity: .85; }
+    [hidden] { display: none !important; }
+    @media (prefers-color-scheme: dark) { .feedback { border-color: #444; } }
   </style>
 </head>
 <body>
@@ -53,7 +59,11 @@
         <span class="slider"></span>
       </label>
     </div>
-    <p class="status" id="status">Loading…</p>
+    <p class="status" id="status" aria-live="polite">Loading…</p>
+    <div class="feedback">
+      <a id="feedback-link" target="_blank" rel="noopener noreferrer">Report a problem or share an idea</a>
+      <p id="feedback-hint" class="feedback-hint" hidden>Not what you expected? <a id="feedback-hint-link" target="_blank" rel="noopener noreferrer">Tell me what happened</a>.</p>
+    </div>
   </div>
   <script src="popup.js"></script>
 </body>
