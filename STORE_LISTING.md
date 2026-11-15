@@ -1,7 +1,7 @@
-# Chrome Web Store listing — v1.2.4
+# Chrome Web Store listing — v1.2.5
 
-Copy-paste this into the Developer Dashboard for the v1.2.4 review submission.
-Upload artifact: `youtube-shorts-remover-v1.2.4.zip`
+Copy-paste this into the Developer Dashboard for the v1.2.5 review submission.
+Upload artifact: `youtube-shorts-remover-v1.2.5.zip`
 
 The name and short description of each language come from `_locales/<lang>/messages.json` in the package. The dashboard's per-language **Description** field takes the text under "Localized full descriptions" below.
 
@@ -40,6 +40,10 @@ Open source: https://github.com/in-c0/youtube-shorts-remover
 The extension has one purpose: to hide YouTube Shorts and Playables content from the YouTube interface, with a toggle to enable/disable that behavior.
 
 ## What changed in this version (release notes)
+v1.2.5
+- Fixed Shorts still showing in the Subscriptions feed and home feed when YouTube mixes single Shorts into the video grid.
+- Home-feed Shorts shelves and the sidebar Shorts entry are now detected by link, so they are hidden in every YouTube language.
+
 v1.2.4
 - The extension name and description are now translated into Korean, Japanese, Spanish, Portuguese (Brazil), German, French, Italian, Indonesian, Turkish, Vietnamese and Hindi, so the store listing appears in those languages.
 
