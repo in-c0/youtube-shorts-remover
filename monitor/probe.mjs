@@ -12,10 +12,13 @@ const liveURL = "https://www.youtube.com/results?search_query=shorts";
 const normalURL = "https://www.youtube.com/results?search_query=javascript%20tutorial";
 const fixtureHTML = [
   "<!doctype html><html><head><meta charset='utf-8'><title>Controlled YSR fixture</title>",
-  "<style>grid-shelf-view-model,ytd-horizontal-card-list-renderer,ytd-video-renderer{display:block}</style>",
+  "<style>grid-shelf-view-model,ytd-horizontal-card-list-renderer,ytd-video-renderer,ytd-rich-section-renderer,ytd-rich-item-renderer{display:block}</style>",
   "</head><body>",
   "<grid-shelf-view-model id='shorts'><a href='/shorts/fixture'>Shorts clip</a></grid-shelf-view-model>",
   "<ytd-horizontal-card-list-renderer id='playables'><a href='/playables'>A game</a></ytd-horizontal-card-list-renderer>",
+  "<ytd-rich-section-renderer id='homeShelf'><ytd-rich-shelf-renderer><span id='title'>ショート</span><ytd-rich-item-renderer><ytm-shorts-lockup-view-model><a href='/shorts/home'>x</a></ytm-shorts-lockup-view-model></ytd-rich-item-renderer></ytd-rich-shelf-renderer></ytd-rich-section-renderer>",
+  "<ytd-rich-item-renderer id='looseShort'><ytm-shorts-lockup-view-model-v2><ytm-shorts-lockup-view-model><a href='/shorts/loose'>x</a></ytm-shorts-lockup-view-model></ytm-shorts-lockup-view-model-v2></ytd-rich-item-renderer>",
+  "<ytd-rich-item-renderer id='normalGrid'><a href='/watch?v=grid'>Ordinary grid video</a></ytd-rich-item-renderer>",
   "<ytd-video-renderer id='normal'><a href='/watch?v=fixture'>Ordinary video</a></ytd-video-renderer>",
   "</body></html>"
 ].join("");
@@ -39,7 +42,9 @@ async function runFixture(context) {
     await page.waitForFunction(() => document.documentElement.classList.contains("ysr-active"), null, { timeout: 10000 });
     await page.waitForFunction(() =>
       document.querySelector("#shorts")?.classList.contains("ysr-hidden") &&
-      document.querySelector("#playables")?.classList.contains("ysr-hidden"),
+      document.querySelector("#playables")?.classList.contains("ysr-hidden") &&
+      document.querySelector("#homeShelf")?.classList.contains("ysr-hidden") &&
+      document.querySelector("#looseShort")?.classList.contains("ysr-hidden"),
       null, { timeout: 10000 });
     const result = await page.evaluate(() => {
       const hide = id => getComputedStyle(document.getElementById(id)).display === "none";
@@ -47,11 +52,13 @@ async function runFixture(context) {
         active: document.documentElement.classList.contains("ysr-active"),
         shortsHidden: hide("shorts"),
         playablesHidden: hide("playables"),
-        ordinaryVideoVisible: !hide("normal")
+        localizedHomeShelfHidden: hide("homeShelf"),
+        looseFeedShortHidden: hide("looseShort"),
+        ordinaryVideoVisible: !hide("normal") && !hide("normalGrid")
       };
     });
     return { surface: "CONTROLLED_BROWSER_FIXTURE", state:
-      result.active && result.shortsHidden && result.playablesHidden && result.ordinaryVideoVisible ? "PASS" : "FAILED",
+      result.active && result.shortsHidden && result.playablesHidden && result.localizedHomeShelfHidden && result.looseFeedShortHidden && result.ordinaryVideoVisible ? "PASS" : "FAILED",
       reason: "CHROMIUM_UNPACKED_EXTENSION_FIXTURE", controls: result };
   } catch (error) {
     return { surface: "CONTROLLED_BROWSER_FIXTURE", state: "FAILED",

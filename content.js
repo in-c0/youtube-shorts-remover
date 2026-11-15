@@ -39,6 +39,12 @@ const SHORTS_LINK_SELECTOR = [
   "a[href^='https://www.youtube.com/shorts/']"
 ].join(",");
 
+// Shorts tiles (the vertical lockup YouTube uses for a single Short).
+const SHORTS_TILE_SELECTOR = [
+  "ytm-shorts-lockup-view-model",
+  "ytm-shorts-lockup-view-model-v2"
+].join(",");
+
 function tag(el) {
   if (el) el.classList.add(HIDDEN_CLASS);
 }
@@ -47,6 +53,31 @@ function markShortsAndPlayables() {
   // Shorts entry in the sidebar navigation (Home, Watch pages)
   document.querySelectorAll("a#endpoint[title='Shorts']").forEach(el => {
     tag(el.closest("ytd-guide-entry-renderer"));
+  });
+
+  // Shorts shelves on the homepage / subscriptions feed, matched by their
+  // /shorts/ links or YouTube's own is-shorts attribute instead of English
+  // text, so they are hidden in every UI language.
+  document.querySelectorAll("ytd-rich-shelf-renderer").forEach(shelf => {
+    if (shelf.hasAttribute("is-shorts") ||
+        shelf.querySelector(SHORTS_LINK_SELECTOR + "," + SHORTS_TILE_SELECTOR)) {
+      tag(shelf.closest("ytd-rich-section-renderer") || shelf.closest("div#dismissible") || shelf);
+    }
+  });
+
+  // Loose Shorts tiles mixed into the video grid (subscriptions feed, home,
+  // channel pages). These sit directly in ytd-rich-item-renderer with no
+  // shelf around them, so none of the shelf rules ever reached them.
+  document.querySelectorAll(SHORTS_TILE_SELECTOR).forEach(tile => {
+    tag(tile.closest("ytd-rich-item-renderer, ytd-grid-video-renderer, ytd-video-renderer") || tile);
+  });
+  document.querySelectorAll("ytd-rich-item-renderer, ytd-grid-video-renderer, ytd-video-renderer").forEach(item => {
+    if (item.querySelector(SHORTS_LINK_SELECTOR)) tag(item);
+  });
+
+  // Shorts entry in the sidebar by link (any language)
+  document.querySelectorAll("ytd-guide-entry-renderer a[href='/shorts'], ytd-mini-guide-entry-renderer a[href='/shorts'], ytd-guide-entry-renderer a[title='Shorts'], ytd-mini-guide-entry-renderer a[title='Shorts']").forEach(a => {
+    tag(a.closest("ytd-guide-entry-renderer, ytd-mini-guide-entry-renderer"));
   });
 
   // Shorts shelves identified by an aria-label button (older layout)
