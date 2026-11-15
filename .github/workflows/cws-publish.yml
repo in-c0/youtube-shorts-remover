@@ -1,0 +1,61 @@
+# Publishes the extension to the Chrome Web Store whenever manifest.json (version) changes on main.
+# Secrets: CWS_CLIENT_ID / CWS_CLIENT_SECRET / CWS_REFRESH_TOKEN (see Project-harness INFRA.md).
+name: cws-publish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "manifest.json"
+      - ".github/workflows/cws-publish.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cws-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ITEM_ID: dilmoegnonbiadmhbmaehnhogjlkikdp
+      CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+      CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+      CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check secrets exist
+        run: |
+          for v in CWS_CLIENT_ID CWS_CLIENT_SECRET CWS_REFRESH_TOKEN; do
+            [ -n "${!v}" ] || { echo "::error::missing secret $v"; exit 1; }
+          done
+      - name: Build zip
+        run: |
+          VERSION=$(jq -r .version manifest.json)
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          zip -qr ysr.zip manifest.json content.js popup.html popup.js icon.png _locales
+          unzip -l ysr.zip | tail -1
+      - name: Get access token
+        run: |
+          TOKEN=$(curl -fsS https://oauth2.googleapis.com/token \
+            -d client_id="$CWS_CLIENT_ID" -d client_secret="$CWS_CLIENT_SECRET" \
+            -d refresh_token="$CWS_REFRESH_TOKEN" -d grant_type=refresh_token | jq -r .access_token)
+          [ -n "$TOKEN" ] && [ "$TOKEN" != null ] || { echo "::error::token exchange failed"; exit 1; }
+          echo "::add-mask::$TOKEN"
+          echo "TOKEN=$TOKEN" >> "$GITHUB_ENV"
+      - name: Upload v${{ env.VERSION }}
+        run: |
+          curl -fsS -X PUT -H "Authorization: Bearer $TOKEN" -H "x-goog-api-version: 2" \
+            -T ysr.zip "https://www.googleapis.com/upload/chromewebstore/v1.1/items/$ITEM_ID" | tee upload.json
+          jq -e '.uploadState == "SUCCESS" or .uploadState == "IN_PROGRESS"' upload.json >/dev/null \
+            || { echo "::error::upload not accepted"; exit 1; }
+      - name: Submit for review / publish
+        run: |
+          curl -fsS -X POST -H "Authorization: Bearer $TOKEN" -H "x-goog-api-version: 2" -H "Content-Length: 0" \
+            "https://www.googleapis.com/chromewebstore/v1.1/items/$ITEM_ID/publish" | tee publish.json
+          jq -e '(.status // []) | index("OK") or index("ITEM_PENDING_REVIEW")' publish.json >/dev/null \
+            || { echo "::error::publish not accepted"; exit 1; }
